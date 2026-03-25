@@ -82,17 +82,11 @@
                             <tr>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Agendamento</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Coordenador</th>
-                                <th class="p-2 md:p-4 whitespace-nowrap">Hr. Carregamento</th>
-                                <th class="p-2 md:p-4 whitespace-nowrap">Quantidade </th>
-                                <th class="p-2 md:p-4 whitespace-nowrap">Hr. Liberação Qualidade</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Placa</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Motorista/telefone</th>
-                                <th class="p-2 md:p-4 whitespace-nowrap">Ordem de Carga</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Tipo de Carga</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Hor. Faturamento</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">STATUS</th>
-                                <th class="p-2 md:p-4 whitespace-nowrap">ETAPA</th>
-                                <th class="p-2 md:p-4 whitespace-nowrap">Observações</th>
                             </tr>
                         </thead>
 
@@ -149,11 +143,14 @@
 
         console.log(dados.user.tipo);
 
-        if (dados.user.tipo === 'adm') {
-            window.location.href = `/Templates/tabelaCargasComercial.html?data=${data}`;
+        if (dados.user.tipo != 'adm') {
+            window.location.href = `/Templates/tabelaCargas.html?data=${data}`;
         }
     }
     validarUsuario();
+
+
+
 
     let select = document.getElementById("select_estab");
 
@@ -167,16 +164,15 @@
         select.appendChild(option);
     });
 
-    //Deslogar
+
     document.getElementById("sair").addEventListener("click", () => {
-        localStorage.removeItem("token"); // remove o token
+        localStorage.removeItem("token");
 
         window.location.href = "/login";
     });
 </script>
 
 <script>
-    // Pega os parâmetros da URL
     const params = new URLSearchParams(window.location.search);
 
     // Pega especificamente a "data"

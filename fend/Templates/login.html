@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Cargas</title>
-    <link rel="stylesheet" href="../Style/style.css">
-    <link rel="stylesheet" href="../Style/media.css">
+    <link rel="stylesheet" href="/Style/style.css">
+    <link rel="stylesheet" href="/Style/media.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -36,12 +37,13 @@
     </main>
 </body>
 <script>
+
     document.getElementById("entrar").addEventListener("click", async function () {
         let user = document.getElementById("campo_user").value;
         let pass = document.getElementById("campo_pass").value;
 
         try {
-            const response = await fetch("http://localhost:3000/login", {
+            const response = await fetch("/validaLogin", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -65,8 +67,8 @@
                     backgroundColor: "green"
                 }).showToast();
                 console.log(data);
-                
-                window.location.href = "/fend/Templates/home.html";
+
+                window.location.href = "/";
             } else {
                 Toastify({
                     text: data.erro || "Erro no login",

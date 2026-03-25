@@ -7,6 +7,13 @@ oracledb.initOracleClient({
 });
 
 async function getConnection() {
+
+    console.log("ENV:", {
+        user: process.env.DB_USER_H,
+        pass: process.env.DB_PASSWORD_H,
+        conn: process.env.DB_CONNECTION_H
+    });
+
     return await oracledb.getConnection({
         user: process.env.DB_USER_H,
         password: process.env.DB_PASSWORD_H,

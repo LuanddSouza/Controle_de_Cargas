@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Cargas</title>
-    <link rel="stylesheet" href="../Style/style.css">
-    <link rel="stylesheet" href="../Style/media.css">
+    <link rel="stylesheet" href="/Style/style.css">
+    <link rel="stylesheet" href="/Style/media.css">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -16,7 +16,7 @@
     <head>
         <div class="header bg-green-700">
             <div class="header_conteudo">
-                <img class="header_logo" src="../img/logo-nutrepampa.png" alt="Logo Nutrepampa">
+                <img class="header_logo" src="/img/logo-nutrepampa.png" alt="Logo Nutrepampa">
                 <h2 class="header_titulo">CONTROLE DE SAÍDA E AGENDAMENTO DE CARGAS</h2>
             </div>
             <div>
@@ -55,12 +55,12 @@
 
         if (!token) {
 
-            window.location.href = "/fend/Templates/login.html";
+            window.location.href = "/login";
             return;
         }
 
         try {
-            const response = await fetch("http://localhost:3000/home", {
+            const response = await fetch("/home", {
                 headers: {
                     "Authorization": "Bearer " + token
                 }
@@ -79,7 +79,7 @@
 
             // token inválido → volta pro login
             localStorage.removeItem("token");
-            window.location.href = "/fend/Templates/login.html";
+            window.location.href = "/login";
         }
     }
 
@@ -108,7 +108,7 @@
             initialView: 'dayGridMonth',
             locale: 'pt-br',
             height: 600,
-
+        
             events: [
                 {
                     title: 'Soja',
@@ -142,25 +142,43 @@
             ],
 
 
-            dateClick: function (info) {
+            dateClick: async function (info) {
                 const data = info.dateStr;
+                const token = localStorage.getItem("token");
 
-                // Redireciona para outra página passando a data
-                window.location.href = `tabelaCargas.html?data=${data}`;
-            }
+                    const response = await fetch("/home", {
+                        headers: {
+                            "Authorization": "Bearer " + token
+                        }
+                    });
 
-        });
+                    const dados = await response.json();
+
+                    //se comercial
+                    console.log(dados.user.tipo);
+                    if (dados.user.tipo == 'adm') {
+                        window.location.href = `Templates/tabelaCargasComercial.html?data=${data}`;
+                    } else {
+                        // Redireciona para outra página passando a data
+                        window.location.href = `Templates/tabelaCargas.html?data=${data}`;
+                    }
+
+                }
+            
+    });
 
         calendar.render();
+
     });
 </script>
 
 <script>
-        //Deslogar
+    //Deslogar
     document.getElementById("sair").addEventListener("click", () => {
         localStorage.removeItem("token"); // remove o token
 
-        window.location.href = "/fend/Templates/login.html";
+        window.location.href = "/login";
     });
 </script>
+
 </html>
