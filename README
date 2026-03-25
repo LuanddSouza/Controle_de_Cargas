@@ -1,0 +1,184 @@
+# 📦 Controle de Saída e Agendamento de Cargas
+
+Sistema web para gerenciamento de cargas, com autenticação de usuários, controle de acesso e visualização em calendário.
+
+---
+
+## Funcionalidades
+
+* 🔐 Login com autenticação via JWT
+* 👥 Controle de acesso por tipo de usuário
+* 📅 Visualização de cargas em calendário
+* 🚚 Cadastro e acompanhamento de cargas
+* 🌐 Acesso via rede local (IP da máquina)
+
+---
+
+##  Tecnologias utilizadas
+
+### Backend
+
+* Node.js
+* Express
+* Oracle Database
+* JWT (JSON Web Token)
+
+### Frontend
+
+* HTML
+* CSS
+* JavaScript
+* Tailwind CSS
+* FullCalendar
+
+---
+
+## 📁 Estrutura do projeto
+
+```
+/
+├── bend/
+│   └── controllers/
+│       ├── login.js
+│       └── db.js
+├── fend/
+│   ├── Templates/
+│   │   ├── login.html
+│   │   ├── index.html
+│   │   └── ...
+│   ├── Style/
+│   └── img/
+├── middlewares/
+│   └── authMiddleware.js
+├── server.js
+├── package.json
+└── .env
+```
+
+---
+
+## ⚙️ Configuração do ambiente
+
+### 1. Clonar o repositório
+
+```bash
+git clone <https...>
+cd nome-do-projeto
+```
+
+---
+
+### 2. Instalar dependências
+
+```bash
+npm install
+```
+
+---
+
+### 3. Configurar o arquivo `.env`
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
+DB_USER=seu_usuario
+DB_PASSWORD=sua_senha
+DB_CONNECTION=host:porta/servico
+JWT_SECRET=sua_chave_secreta
+```
+
+---
+
+### 4. Configurar Oracle Client
+
+Certifique-se de ter o Oracle Instant Client instalado e configurado:
+
+```js
+oracledb.initOracleClient({
+    libDir: 'C:\\Oracle\\instantclient_23_0'
+});
+```
+
+---
+
+## ▶️ Como executar o projeto
+
+### Iniciar o servidor
+
+```bash
+node server.js
+```
+
+ou (recomendado):
+
+```bash
+npx nodemon server.js
+```
+
+---
+
+### Acessar o sistema
+
+No navegador:
+
+```
+http://localhost:3000/login
+```
+
+ou via rede:
+
+```
+http://SEU_IP:3000/login
+```
+
+Exemplo:
+
+```
+http://10.1.2.78:3000/login
+```
+
+---
+
+## 🔐 Autenticação
+
+* O login gera um token JWT
+* O token é armazenado no `localStorage`
+* Rotas protegidas exigem o header:
+
+```http
+Authorization: Bearer SEU_TOKEN
+```
+
+---
+
+## 🔒 Controle de acesso
+
+O sistema permite diferenciar usuários por tipo:
+
+* `adm` → acesso administrativo
+* outros → acesso por setor
+
+A validação ocorre:
+
+* no frontend (redirecionamento)
+* no backend (proteção de rotas)
+
+---
+
+## 🌐 Acesso em rede
+
+O servidor está configurado para aceitar conexões externas:
+
+```js
+app.listen(3000, '0.0.0.0');
+```
+
+Isso permite que outros usuários da rede acessem via IP da máquina.
+
+---
+
+## 👨‍💻 Autor
+
+Desenvolvido por Luan de Souza 🚀
+
+---
