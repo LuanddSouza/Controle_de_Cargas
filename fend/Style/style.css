@@ -1,0 +1,416 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #e6e6e6;
+    color: #000000;
+    transition: background-color 0.3s, color 0.3s;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.header {
+    color: rgb(255, 255, 255);
+    height: 10dvh;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+    position: relative;
+    /* importante */
+}
+
+.header_conteudo {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header_logo {
+    width: 250px;
+}
+
+.header_titulo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+main {
+    flex: 1;
+    /* ocupa o resto da tela */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/*-------- TELA DE LOGIN ---------*/
+
+.container_login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    width: 500px;
+    height: 300px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Título */
+.container_login h2 {
+    margin-bottom: 20px;
+    color: #14710A;
+}
+
+.login_campos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.login_campos input {
+    width: 80%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+/* Efeito ao clicar */
+.login_campos input:focus {
+    border: 1px solid #14710A;
+    box-shadow: 0 0 5px rgba(20, 113, 10, 0.3);
+}
+
+/* Botão Entrar*/
+.login_campos button {
+    width: 85%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    background-color: #14710A;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    margin-bottom: 10px;
+}
+
+/* Hover bonito */
+.login_campos button:hover {
+    background-color: #0f5c08;
+}
+
+/* Clique */
+.login_campos button:active {
+    transform: scale(0.98);
+}
+
+/*-------- TELA DE ALTERAR A SENHA ---------*/
+
+.container_alterar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    width: 500px;
+    height: 350px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Título */
+.container_alterar h2 {
+    margin-bottom: 20px;
+    color: #14710A;
+}
+
+.alterar_campos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    width: 100%;
+}
+
+.alterar_campos input {
+    width: 80%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+/* Efeito ao clicar */
+.alterar_campos input:focus {
+    border: 1px solid #14710A;
+    box-shadow: 0 0 5px rgba(20, 113, 10, 0.3);
+}
+
+/* Botão Entrar*/
+.alterar_campos button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+.alterar_campos a {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    margin-left: 30px;
+    margin-right: 30px;
+    text-align: center;
+}
+
+#atualizar:hover {
+    background-color: #ac620e;
+}
+
+/* Clique */
+.botoes_alterar button:active {
+    transform: scale(0.98);
+}
+
+.botoes_alterar a:active {
+    transform: scale(0.98);
+}
+
+.botoes_alterar {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+#atualizar {
+    background-color: #e2861c;
+}
+
+#voltar {
+    background-color: #0f5c08;
+    text-decoration: none;
+
+}
+
+#voltar:hover {
+    background-color: #0b3b05;
+}
+
+/*-------- TELA HOME ----------*/
+
+
+.container_home {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+}
+
+.filtros {
+    display: flex;
+    flex-direction: row;
+    padding: 40px;
+}
+
+.filtros_home {
+    height: 40px;
+    font-size: 20px;
+    width: 400px;
+    margin: 10px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    border: none;
+    box-shadow: 0 0 5px rgba(20, 113, 10, 0.3);
+}
+
+.btn_filtrar {
+    width: 100px;
+}
+
+.btn_filtrar:hover {
+    background-color: #e6e6e6;
+}
+
+.btn_filtrar:active {
+    transform: scale(0.98);
+}
+
+
+/*-------------CALENDARIO------------*/
+.calendario {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+#calendar {
+    width: 55%;
+    height: 65%;
+    max-width: 1200px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.fc {
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.fc-toolbar-title {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.fc-button {
+    background-color: #2f6fed !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+}
+
+.fc-button:hover {
+    background-color: #1c4fd7 !important;
+}
+
+.fc-daygrid-day {
+    transition: 0.2s;
+}
+
+.fc-daygrid-day:hover {
+    background-color: #f5f7ff;
+    cursor: pointer;
+}
+
+.fc-day-today {
+    background-color: #e7f0ff !important;
+}
+
+
+
+/*----------TELA TABELA CARGAS------------*/
+
+.filtro_tabela_busca {
+    display: flex;
+    gap: 15px;
+}
+
+.input-icon {
+    position: relative;
+}
+
+.input-icon input {
+    padding: 10px 10px 10px 35px;
+    /* espaço pro ícone */
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.input-icon .icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #777;
+}
+
+.input-icon input:focus {
+    outline: none;
+    border-color: #2f6fed;
+    box-shadow: 0 0 0 2px rgba(47, 111, 237, 0.2);
+}
+
+.filtos_tabela {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 35px;
+
+}
+
+.filtos_tabela_periodo {
+    display: flex;
+    gap: 15px;
+    /* espaço entre os itens */
+}
+
+.filtro {
+    width: 280px;
+    height: 34px;
+    border-radius: 6px;
+}
+
+.filtro_btn {
+    width: 80px;
+    height: 34px;
+    background-color: #ffffff;
+    border: 1px solid #828282;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+    color: #000000;
+}
+
+.filtro_data {
+    height: 29px;
+}
+
+.filto_busca {
+    height: 24px;
+}
+
+.a_voltar {
+    display: inline-block;
+    text-decoration: none;
+    width: 60px;
+    height: 28px;
+    padding-top: 5px;
+}
+
+.filtro_btn:hover {
+    background-color: #cecece;
+}

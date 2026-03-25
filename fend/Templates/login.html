@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Cargas</title>
+    <link rel="stylesheet" href="../Style/style.css">
+    <link rel="stylesheet" href="../Style/media.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+    <head>
+        <div class="header bg-green-700">
+            <div class="header_conteudo">
+                <img class="header_logo" src="../img/logo-nutrepampa.png" alt="Logo Nutrepampa">
+                <h2 class="header_titulo">CONTROLE DE SAÍDA E AGENDAMENTO DE CARGAS</h2>
+            </div>
+        </div>
+    </head>
+    <main>
+        <div class="container_login">
+            <h2>Login</h2>
+            <div class="login_campos">
+                <input id="campo_user" type="text" placeholder="Usuario">
+                <input id="campo_pass" type="text" placeholder="Senha">
+                <button id="entrar">Entrar</button>
+            </div>
+            <!-- <a href="./alterarSenha.html">Alterar senha</a> -->
+        </div>
+
+    </main>
+</body>
+<script>
+    document.getElementById("entrar").addEventListener("click", async function () {
+        let user = document.getElementById("campo_user").value;
+        let pass = document.getElementById("campo_pass").value;
+
+        try {
+            const response = await fetch("http://localhost:3000/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    user: user,
+                    pass: pass
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem("token", data.token);
+
+                Toastify({
+                    text: "Login realizado com sucesso",
+                    duration: 600,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "green"
+                }).showToast();
+                console.log(data);
+                
+                window.location.href = "/fend/Templates/home.html";
+            } else {
+                Toastify({
+                    text: data.erro || "Erro no login",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "red"
+                }).showToast();
+            }
+
+        } catch (err) {
+            console.error("Erro:", err);
+            Toastify({
+                text: "Erro ao conectar com servidor",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "orange"
+            }).showToast();
+        }
+
+    });
+</script>
+
+</html>
