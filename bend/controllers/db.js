@@ -6,23 +6,17 @@ oracledb.initOracleClient({
     libDir: 'C:\\Oracle\\instantclient_23_0'
 });
 
+//banco de Produção
 async function getConnection() {
 
-    console.log("ENV:", {
-        user: process.env.DB_USER_H,
-        pass: process.env.DB_PASSWORD_H,
-        conn: process.env.DB_CONNECTION_H
-    });
-
     return await oracledb.getConnection({
-        user: process.env.DB_USER_H,
-        password: process.env.DB_PASSWORD_H,
-        connectionString: process.env.DB_CONNECTION_H,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        connectionString: process.env.DB_CONNECTION,
         poolMin: 1,
         poolMax: 8,
         poolIncrement: 1
     });
 
 }
-
 module.exports = { getConnection };
