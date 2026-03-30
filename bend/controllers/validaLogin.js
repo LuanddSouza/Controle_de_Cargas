@@ -58,8 +58,20 @@ async function login(req, res) {
     try {
         const conn = await getConnection();
         const result = await conn.execute(
-             `SELECT USERID, SENHACRIP FROM U_USUARIOSCUSTO WHERE USERID = :userid`,
-            { userid: user }
+             `SELECT
+                U_USUARIOSCUSTO.USERID, 
+                U_USUARIOSCUSTO.SENHACRIP, 
+                U_USUARIOSCUSTO.U_USUARIOSCUSTO_ID,
+                u_usuariostatus.U_STATUSAGENDAMENTO_ID,
+                u_statusagendamento.DESCRICAO
+                FROM U_USUARIOSCUSTO
+
+                left join u_usuariostatus on U_USUARIOSCUSTO.U_USUARIOSCUSTO_ID = u_usuariostatus.U_USUARIOSCUSTO_ID
+                left join u_statusagendamento on u_usuariostatus.U_STATUSAGENDAMENTO_ID = u_statusagendamento.U_STATUSAGENDAMENTO_ID
+
+                WHERE USERID = :userid`,
+            { userid: user },
+             { outFormat: require("oracledb").OUT_FORMAT_OBJECT }
         );
 
         const usuario = result.rows[0];
@@ -70,6 +82,7 @@ async function login(req, res) {
             return res.status(401).json({ erro: "Usuário inválido" });
         }
 
+        const userTipo = usuario.DESCRICAO || usuario[4]
         const senhaHash = usuario.SENHACRIP || usuario[1];
 
         if (!senhaHash) {
@@ -87,7 +100,7 @@ async function login(req, res) {
         const token = jwt.sign(
             {
                 user: user,
-               // tipo: 'adm' //adm ou o status referente a carga para os usuarios
+                tipo: userTipo //adm ou o status referente a carga para os usuarios
             },
             getSecret(),
             { expiresIn: "1h" }

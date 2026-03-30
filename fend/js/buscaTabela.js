@@ -52,29 +52,17 @@ function montarTabela(lista) {
             <td class="p-4">${item[0] ?? ''}</td>
             <td class="p-4">${item[1] ?? ''}</td>
 
-            <td class="p-4">
-                <input type="text" value="${item[2] ?? ''}"
-                    class="border rounded px-2 py-1 w-full"
-                    onchange="atualizarCampo(${id}, 'campo2', this.value)">
-            </td>
+            <td class="p-4">${item[2] ?? ''}</td>
 
             <td class="p-4">${item[3] ?? ''}</td>
 
-            <td class="p-4">
-                <input type="text" value="${item[4] ?? ''}"
-                    class="border rounded px-2 py-1 w-full"
-                    onchange="atualizarCampo(${id}, 'campo4', this.value)">
-            </td>
+            <td class="p-4">${item[4] ?? ''}</td>
 
             <td class="p-4">${item[5] ?? ''}</td>
             <td class="p-4">${item[6] ?? ''}</td>
             <td class="p-4">${item[7] ?? ''}</td>
 
-            <td class="p-4">
-                <input type="text" value="${item[8] ?? ''}"
-                    class="border rounded px-2 py-1 w-full"
-                    onchange="atualizarCampo(${id}, 'campo8', this.value)">
-            </td>
+            <td class="p-4">${item[8] ?? ''}</td>
 
             <td class="p-4">
                 <select onchange="atualizarStatus(${id}, this.value)">

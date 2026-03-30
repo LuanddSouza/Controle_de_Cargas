@@ -10,6 +10,13 @@ const { getConnection } = require("./bend/controllers/db");
 
 const app = express();
 
+const permissoes = {
+    producao: ["producao"],
+    logistica: ["carregando"],
+    financeiro: ["faturado"],
+    adm: ["producao", "carregando", "faturado", "cancelado"]
+};
+
 app.use(cors());
 app.use(express.json());
 
@@ -32,7 +39,8 @@ app.get("/", (req, res) => {
 app.get("/home", authMiddleware, (req, res) => {
     res.json({
         msg: "Acesso liberado",
-        user: req.user
+        user: req.user,
+        tipo: req.tipo
     });
 });
 
@@ -185,7 +193,7 @@ ORDER BY
 });
 
 
-// UPDATE STATUS
+//ADICIONAR STATUS
 app.put("/cargas/:id/status", authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
@@ -193,17 +201,27 @@ app.put("/cargas/:id/status", authMiddleware, async (req, res) => {
 
         const conn = await getConnection();
 
-        await conn.execute(
-            `UPDATE CARGAS SET STATUS = :status WHERE ID = :id`,
-            { status, id },
-            { autoCommit: true }
+              await conn.execute(
+            `INSERT INTO u_logstatusagendamento 
+            (
+                u_statusagendamento_id,
+                u_usuarioscusto_id,
+                datalancamento,
+                numagendamento
+            )
+            VALUES (?, ?, NOW(), ?)`,
+            [
+                status,              // status novo
+                user.tipo,          // usuário que alterou
+                id                   // id da carga
+            ]
         );
 
         res.sendStatus(200);
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ erro: "Erro ao atualizar status" });
+        res.status(500).json({ erro: "Erro ao inserir status" });
     }
 });
 
