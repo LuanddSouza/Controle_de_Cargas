@@ -87,7 +87,7 @@ async function login(req, res) {
         const token = jwt.sign(
             {
                 user: user,
-                tipo: 'adm' //adm ou o status referente a carga para os usuarios
+               // tipo: 'adm' //adm ou o status referente a carga para os usuarios
             },
             getSecret(),
             { expiresIn: "1h" }

@@ -34,13 +34,14 @@
                     <div class="flex flex-col md:flex-row gap-3 w-full">
                         <select id="select_estab"
                             class="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
-                            <option>Estabelecimentos</option>
+
                         </select>
 
                         <input type="date"
                             class="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
 
-                        <button class="bg-green-700 text-white px-5 py-2 rounded-lg hover:bg-green-600 transition">
+                        <button id="btn_filtrar"
+                            class="bg-green-700 text-white px-5 py-2 rounded-lg hover:bg-green-600 transition">
                             Filtrar
                         </button>
 
@@ -87,46 +88,14 @@
                                 <th class="p-2 md:p-4 whitespace-nowrap">Hr. Liberação Qualidade</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Placa</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Motorista/telefone</th>
-                                <th class="p-2 md:p-4 whitespace-nowrap">Ordem de Carga</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Tipo de Carga</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Hor. Faturamento</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">STATUS</th>
-                                <th class="p-2 md:p-4 whitespace-nowrap">ETAPA</th>
                                 <th class="p-2 md:p-4 whitespace-nowrap">Observações</th>
                             </tr>
                         </thead>
 
-                        <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium">9004</td>
-                                <td class="p-4 text-gray-600">Felipe</td>
-                                <td class="p-4">
-                                    <span class="text-black-600 px-3 py-1 rounded-full text-sm">
-                                        jkd-3a43
-                                    </span>
-                                </td>
-                                <td class="p-4">
-                                    <span class=" text-black-600 px-3 py-1 rounded-full text-sm">
-                                        Faturamento
-                                    </span>
-                                </td>
-                            </tr>
-
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium">9001</td>
-                                <td class="p-4 text-gray-600">Rafael</td>
-                                <td class="p-4">
-                                    <span class=" text-black-600 px-3 py-1 rounded-full text-sm">
-                                        awd-3v32
-                                    </span>
-                                </td>
-                                <td class="p-4">
-                                    <span class=" text-black-600 px-3 py-1 rounded-full text-sm">
-                                        Produçao
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="tbody_cargas"></tbody>
 
                     </table>
                 </div>
@@ -157,15 +126,22 @@
 
     let select = document.getElementById("select_estab");
 
-    //1,3,5,6,7,800,802
-    let estabelecimentos = ["1 - Nutrepampa Matriz", "3 - Nutrepampa Cerealista",
-        "5 - Jost - Provemix", "6 - Nutrepampa Teutonia", "7 - Nutrepampa Santa Catarina", "800 - Provemix Candeias Do Jamari",
-        "802 - Provemix Vilhena"];
-        
+    let estabelecimentos = [
+        { id: 1, nome: "Nutrepampa Matriz" },
+        { id: 3, nome: "Nutrepampa Cerealista" },
+        { id: 5, nome: "Jost - Provemix" },
+        { id: 6, nome: "Nutrepampa Teutonia" },
+        { id: 7, nome: "Nutrepampa Santa Catarina" },
+        { id: 800, nome: "Provemix Candeias Do Jamari" },
+        { id: 802, nome: "Provemix Vilhena" }
+    ];
+
+
     estabelecimentos.forEach(estab => {
         let option = document.createElement("option");
-        option.value = estab;
-        option.textContent = estab;
+
+        option.value = estab.id;                 //valor que vai pra query
+        option.textContent = `${estab.id} - ${estab.nome}`; //texto que aparece
 
         select.appendChild(option);
     });
@@ -180,15 +156,27 @@
 
 <script>
     // Pega os parâmetros da URL
+   document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
 
-    // Pega especificamente a "data"
     const data = params.get('data');
+    const estab = params.get("estab");
 
-    console.log("Data recebida:", data);
-
-    // Exemplo: colocar no input
+    // seta data
     document.querySelector("input").value = data;
+
+    const selectTela = document.getElementById("select_estab");
+
+    // espera o select estar pronto
+    setTimeout(() => {
+        if (estab) {
+            selectTela.value = estab;
+        }
+
+        // Carregar Tabela
+        carregarTabela();
+    }, 100);
+});
 </script>
 
 <script>
@@ -228,5 +216,8 @@
 
     carregarhome();
 </script>
+
+<script src="../js/buscaTabela.js"></script>
+
 
 </html>
