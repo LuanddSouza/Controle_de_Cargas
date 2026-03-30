@@ -84,6 +84,7 @@ async function login(req, res) {
 
         const userTipo = usuario.DESCRICAO || usuario[4]
         const senhaHash = usuario.SENHACRIP || usuario[1];
+        const userCod = usuario.U_USUARIOSCUSTO_ID || usuario[2];
 
         if (!senhaHash) {
             console.error("Hash não encontrado no usuário");
@@ -100,7 +101,8 @@ async function login(req, res) {
         const token = jwt.sign(
             {
                 user: user,
-                tipo: userTipo //adm ou o status referente a carga para os usuarios
+                tipo: userTipo, //adm ou o status referente a carga para os usuarios
+                userCod: userCod
             },
             getSecret(),
             { expiresIn: "1h" }

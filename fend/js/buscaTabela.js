@@ -36,7 +36,7 @@ async function carregarTabela() {
 // MONTAR TABELA
 function montarTabela(lista) {
     const tbody = document.getElementById("tbody_cargas");
-
+    const estab = document.getElementById("select_estab").value;
     tbody.innerHTML = "";
 
     lista.forEach(item => {
@@ -65,11 +65,13 @@ function montarTabela(lista) {
             <td class="p-4">${item[8] ?? ''}</td>
 
             <td class="p-4">
-                <select onchange="atualizarStatus(${id}, this.value)">
-                    <option value="producao" ${status === 'producao' ? 'selected' : ''}>EM PRODUÇÃO</option>
-                    <option value="carregando" ${status === 'carregando' ? 'selected' : ''}>CARREGANDO</option>
-                    <option value="faturado" ${status === 'faturado' ? 'selected' : ''}>FATURADO</option>
-                    <option value="cancelado" ${status === 'cancelado' ? 'selected' : ''}>CANCELADO</option>
+                <select onchange="atualizarStatus(${id}, '${item[0]}', '${estab}', this.value)">
+                    <option value="pendente" ${status === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+                    <option value="producao" ${status === 'EM PRODUÇÃO' ? 'selected' : ''}>EM PRODUÇÃO</option>
+                    <option value="qualidade" ${status === 'QUALIDADE' ? 'selected' : ''}>QUALIDADE</option>
+                    <option value="carregando" ${status === 'CARREGANDO' ? 'selected' : ''}>CARREGANDO</option>
+                    <option value="faturado" ${status === 'FATURADO' ? 'selected' : ''}>FATURADO</option>
+                    <option value="cancelado" ${status === 'CANCELADO' ? 'selected' : ''}>CANCELADO</option>
                 </select>
             </td>
 
@@ -92,21 +94,30 @@ document.getElementById("btn_filtrar")
 
 
 // ATUALIZAR STATUS
-
-async function atualizarStatus(id, status) {
+async function atualizarStatus(id, agendamento, estab, status) {
     try {
         const token = localStorage.getItem("token");
+        const usuario = localStorage.getItem("usuario");
+        const usuarioCod = localStorage.getItem("userCod");
+        const statusCod = localStorage.getItem("statusCod");
+        const estabCod = document.getElementById("select_estab").value;
+        console.log(`Estabi ${estab}`)
+        console.log(`Estabi ${estabCod}`)
 
+        // Atualiza status normal
         await fetch(`/cargas/${id}/status`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + token
             },
-            body: JSON.stringify({ status })
+            body: JSON.stringify({
+                status,
+                estab
+            })
         });
 
-        console.log(`✅ Status atualizado: ${id} → ${status}`);
+        console.log(`Status atualizado + log enviado`);
 
     } catch (err) {
         console.error("❌ Erro ao atualizar status:", err);

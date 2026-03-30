@@ -5,6 +5,7 @@ const cors = require("cors");
 const path = require("path");
 
 const { login } = require("./bend/controllers/validaLogin");
+const { atualizaStatus } = require("./bend/controllers/atualizaStatus");
 const authMiddleware = require("./middlewares/authMiddleware");
 const { getConnection } = require("./bend/controllers/db");
 
@@ -20,14 +21,19 @@ const permissoes = {
 app.use(cors());
 app.use(express.json());
 
-
 // LOGIN
 app.post("/validaLogin", login);
 
+// Atualizar status
+app.post("/atualizaStatus", atualizaStatus);
 
 // FRONT
 app.get("/login", (req, res) => {
     res.sendFile(path.join(__dirname, "fend", "Templates", "login.html"));
+});
+
+app.get("/addUser", (req, res) => {
+    res.sendFile(path.join(__dirname, "fend", "Templates", "addUser.html"));
 });
 
 app.get("/", (req, res) => {
@@ -196,25 +202,45 @@ ORDER BY
 //ADICIONAR STATUS
 app.put("/cargas/:id/status", authMiddleware, async (req, res) => {
     try {
+        const statusMap = {
+            'pendente': 1,
+            'producao': 2,
+            'qualidade': 3,
+            'carregando': 4,
+            'faturado': 5,
+            'cancelado': 6
+        };
         const { id } = req.params;
-        const { status } = req.body;
-
+        const { status, estab } = req.body;
+        const userCod = req.user.userCod;
+        //console.log(userCod);
         const conn = await getConnection();
+        const statusId = statusMap[status];
 
-              await conn.execute(
+        await conn.execute(
             `INSERT INTO u_logstatusagendamento 
             (
+                U_LOGSTATUSAGENDAMENTO_ID,
                 u_statusagendamento_id,
                 u_usuarioscusto_id,
                 datalancamento,
-                numagendamento
+                numagendamento,
+                ESTAB
             )
-            VALUES (?, ?, NOW(), ?)`,
-            [
-                status,              // status novo
-                user.tipo,          // usuário que alterou
-                id                   // id da carga
-            ]
+            VALUES (
+                SEQ_LOGSTATUSAGENDAMENTO.NEXTVAL,
+                :statusId,
+                :userCod,
+                SYSDATE,
+                :id,
+                :estab
+            )`,
+            {
+                statusId,
+                userCod,
+                id,
+                estab
+            }
         );
 
         res.sendStatus(200);

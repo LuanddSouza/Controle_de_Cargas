@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Usuário</title>
+
+    <link rel="stylesheet" href="../Style/style.css">
+    <link rel="stylesheet" href="../Style/media.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- HEADER -->
+    <header class="bg-green-700 text-white p-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <img class="h-10" src="../img/logo-nutrepampa.png" alt="Logo">
+            <h2 class="text-lg font-bold">CONTROLE DE CARGAS</h2>
+        </div>
+
+        <div class="flex gap-2">
+            <button id="voltarr"
+                class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg shadow">
+                Voltar
+            </button>
+            <button id="sair"
+                class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg shadow">
+                Sair
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="flex justify-center items-center h-[80vh]">
+
+        <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+
+            <h2 class="text-2xl font-bold mb-6 text-center">Criar Usuário</h2>
+
+            <form class="flex flex-col gap-4">
+
+                <div class="flex flex-col" id="usuario">
+                    <label class="text-sm text-gray-600">Usuário</label>
+                    <input type="text"
+                        class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        placeholder="Digite o usuário">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm text-gray-600">Senha</label>
+                    <input type="password" id="senha"
+                        class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        placeholder="Digite a senha">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm text-gray-600">Tipo de usuário</label>
+                    <select id="tipo"
+                        class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="">Selecione</option>
+                        <option value="producao">Produção</option>
+                        <option value="logistica">Logística</option>
+                        <option value="financeiro">Financeiro</option>
+                        <option value="adm">Administrador</option>
+                    </select>
+                </div>
+
+                <!-- BOTÃO -->
+                <button type="submit"
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg mt-4 transition">
+                    Criar Usuário
+                </button>
+
+            </form>
+        </div>
+
+    </main>
+
+</body>
+
+<script>
+    const permissoes = {
+        producao: ["producao"],
+        logistica: ["carregando"],
+        financeiro: ["faturado"],
+        adm: ["producao", "carregando", "faturado", "cancelado"]
+    };
+
+    const form = document.querySelector("form");
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const usuario = document.getElementById("usuario");
+        const senha = document.getElementById("senha");
+        const tipo = document.getElementById("tipo");
+
+        let erro = false;
+
+        [usuario, senha, tipo].forEach(campo => {
+            campo.classList.remove("border-red-500");
+        });
+
+        if (usuario.value.trim() === "") {
+            usuario.classList.add("border-red-500");
+            erro = true;
+        }
+
+        if (senha.value.trim() === "") {
+            senha.classList.add("border-red-500");
+            erro = true;
+        } else if (senha.value.length < 4) {
+            alert("Senha deve ter pelo menos 4 caracteres");
+            senha.classList.add("border-red-500");
+            erro = true;
+        }
+
+        if (tipo.value === "") {
+            tipo.classList.add("border-red-500");
+            erro = true;
+        }
+
+        if (erro) {
+            alert("Preencha corretamente os campos!");
+            return;
+        }
+
+        const novoUsuario = {
+            usuario: usuario.value,
+            senha: senha.value,
+            tipo: tipo.value,
+            permissoes: permissoes[tipo.value]
+        };
+
+       // Post para inserir o novo usuario
+       //
+       ///
+       //
+       ///
+
+        console.log("Usuário criado:", novoUsuario);
+
+        alert("Usuário criado com sucesso!");
+
+        form.reset();
+    });
+
+    // Deslogar
+    document.getElementById("sair").addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+    });
+
+    // Voltar
+    document.getElementById("voltarr").addEventListener("click", () => {
+        window.location.href = "/";
+    });
+</script>
+
+</html>

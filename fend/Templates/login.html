@@ -59,6 +59,12 @@
             if (response.ok) {
                 localStorage.setItem("token", data.token);
 
+                const payload = JSON.parse(atob(data.token.split('.')[1]));
+
+                localStorage.setItem("usuario", payload.user);
+                localStorage.setItem("tipo", payload.tipo);
+                localStorage.setItem("userCod", payload.userCod);
+
                 Toastify({
                     text: "Login realizado com sucesso",
                     duration: 600,
