@@ -63,8 +63,9 @@ async function login(req, res) {
                 U_USUARIOSCUSTO.SENHACRIP, 
                 U_USUARIOSCUSTO.U_USUARIOSCUSTO_ID,
                 u_usuariostatus.U_STATUSAGENDAMENTO_ID,
-                u_statusagendamento.DESCRICAO
-                FROM U_USUARIOSCUSTO
+                u_statusagendamento.DESCRICAO,
+                u_usuarioscusto.COMERCIAL
+            FROM U_USUARIOSCUSTO
 
                 left join u_usuariostatus on U_USUARIOSCUSTO.U_USUARIOSCUSTO_ID = u_usuariostatus.U_USUARIOSCUSTO_ID
                 left join u_statusagendamento on u_usuariostatus.U_STATUSAGENDAMENTO_ID = u_statusagendamento.U_STATUSAGENDAMENTO_ID
@@ -84,7 +85,7 @@ async function login(req, res) {
 
         const userTipo = usuario.DESCRICAO || usuario[4]
         const senhaHash = usuario.SENHACRIP || usuario[1];
-        const userCod = usuario.U_USUARIOSCUSTO_ID || usuario[2];
+        const userCod = usuario.COMERCIAL || usuario[2];
 
         if (!senhaHash) {
             console.error("Hash não encontrado no usuário");

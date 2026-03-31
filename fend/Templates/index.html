@@ -92,7 +92,10 @@
 </script>
 
 <script>
+    let calendar;
+
     let select = document.getElementById("select_estab");
+
     let estabelecimentos = [
         { id: 1, nome: "Nutrepampa Matriz" },
         { id: 3, nome: "Nutrepampa Cerealista" },
@@ -103,66 +106,83 @@
         { id: 802, nome: "Provemix Vilhena" }
     ];
 
-
+    // popula select
     estabelecimentos.forEach(estab => {
         let option = document.createElement("option");
-
-        option.value = estab.id;                 //valor que vai pra query
-        option.textContent = `${estab.id} - ${estab.nome}`; //texto que aparece
-
+        option.value = estab.id;
+        option.textContent = `${estab.id} - ${estab.nome}`;
         select.appendChild(option);
     });
 
-
-    // filtrar pelo estavbelecimento
+    // botão filtrar
     document.getElementById("btn_filtrar").addEventListener("click", () => {
-
-        let estabelecimentoSelecionado = select.value;
-
-        // console.log(estabelecimentoSelecionado); 
+        if (calendar) {
+            calendar.refetchEvents();
+        }
     });
 
     document.addEventListener('DOMContentLoaded', function () {
 
         const calendarEl = document.getElementById('calendar');
 
-        const calendar = new FullCalendar.Calendar(calendarEl, {
+        calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'pt-br',
             height: 600,
 
-            events: [
-                {
-                    title: 'Soja',
-                    date: '2026-03-19',
-                    color: '#2f6fed'
-                },
-                {
-                    title: 'Milho',
-                    date: '2026-03-19',
-                    color: '#28a745'
-                },
-                {
-                    title: '🚚 Soja',
-                    date: '2026-03-01'
-                },
-                {
-                    title: '🚚 Milho',
-                    date: '2026-03-27'
-                }, {
-                    title: 'Soja - 1000kg',
-                    date: '2026-03-11'
-                },
-                {
-                    title: 'Milho - 800kg',
-                    date: '2026-03-13'
-                },
-                {
-                    title: 'Trigo - 500kg',
-                    date: '2026-03-21'
-                }
-            ],
+            events: async function (fetchInfo, successCallback, failureCallback) {
+                try {
+                    const token = localStorage.getItem("token");
+                    const estab = document.getElementById("select_estab").value;
 
+                    const response = await fetch(`/cargas-calendario?estab=${estab}`, {
+                        headers: {
+                            "Authorization": "Bearer " + token
+                        }
+                    });
+
+                    const dados = await response.json();
+
+                    const eventos = dados.map(item => {
+
+                        const total = item.TOTAL_CARGAS;
+                        const produzidas = item.PRODUZIDAS;
+                        const faturadas = item.FATURADAS;
+
+                        let color = '#15803D'; //pendente
+
+                        if (faturadas === total && total > 0) {
+                            color = '#DEF2CC'; //tudo faturado
+                        } else if (produzidas === total && total > 0) {
+                            color = '#C4F5E5'; // tudo produzido
+                        }
+
+                        return {
+                            title: `
+                                <div style="font-size:12px; line-height:1.2">
+                                    <b>Total de Cargas ${total}</b><br>
+                                    Total Prouzido ${produzidas}<br>
+                                    Total Faturado ${faturadas}
+                                </div>
+                            `,
+                            date: item.DATA,
+                            backgroundColor: color,
+                            borderColor: color
+                        };
+                    });
+
+                    successCallback(eventos);
+
+                } catch (err) {
+                    console.error(err);
+                    failureCallback(err);
+                }
+            },
+
+            //permite HTML dentro do evento
+            eventContent: function (arg) {
+                return { html: arg.event.title };
+            },
 
             dateClick: async function (info) {
                 const data = info.dateStr;
@@ -178,21 +198,15 @@
 
                 const dados = await response.json();
 
-                //se comercial
-                console.log(dados.user.tipo);
-                if (dados.user.tipo == 'adm') {
+                if (dados.user.userCod == 'S') {
                     window.location.href = `Templates/tabelaCargasComercial.html?data=${data}&estab=${codEstab}`;
                 } else {
-                    // Redireciona para outra página passando a data
                     window.location.href = `Templates/tabelaCargas.html?data=${data}&estab=${codEstab}`;
                 }
-
             }
-
         });
 
         calendar.render();
-
     });
 </script>
 
