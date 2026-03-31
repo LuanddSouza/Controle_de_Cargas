@@ -18,7 +18,7 @@ async function atualizaStatus(req, res) {
         if (!statusId) {
             return res.status(400).json({ erro: "Status inválido" });
         }
-
+        console.log(agendamento);
         // exemplo Oracle
         const sql = `
             INSERT INTO u_logstatusagendamento (

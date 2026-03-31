@@ -144,7 +144,7 @@ FROM
     LEFT JOIN ordemcargacab_u 
         ON ordemcargacab_u.idcarga = cargafat.carga 
        
-    WHERE cargafat.estab = 6
+    WHERE cargafat.estab = :estab
     AND cargafat.dtinclusao = TO_DATE(:data, 'DD/MM/YYYY')
     
 ) t
@@ -187,7 +187,10 @@ GROUP BY
 
 ORDER BY 
     t.carga` ,
-            { data }
+            {
+                estab,
+                data
+            }
         );
 
         res.json(result.rows);
@@ -200,7 +203,7 @@ ORDER BY
 
 
 //ADICIONAR STATUS
-app.put("/cargas/:id/status", authMiddleware, async (req, res) => {
+app.put("/cargas/:agendamento/status", authMiddleware, async (req, res) => {
     try {
         const statusMap = {
             'pendente': 1,
@@ -210,12 +213,12 @@ app.put("/cargas/:id/status", authMiddleware, async (req, res) => {
             'faturado': 5,
             'cancelado': 6
         };
-        const { id } = req.params;
+        const { agendamento } = req.params;
         const { status, estab } = req.body;
         const userCod = req.user.userCod;
-        //console.log(userCod);
-        const conn = await getConnection();
+        console.log(agendamento);
         const statusId = statusMap[status];
+        const conn = await getConnection();
 
         await conn.execute(
             `INSERT INTO u_logstatusagendamento 
@@ -228,21 +231,22 @@ app.put("/cargas/:id/status", authMiddleware, async (req, res) => {
                 ESTAB
             )
             VALUES (
-                SEQ_LOGSTATUSAGENDAMENTO.NEXTVAL,
+                SEQ_U_LOGSTATUSAGENDAMENTO.NEXTVAL,
                 :statusId,
                 :userCod,
                 SYSDATE,
-                :id,
+                :agendamento,
                 :estab
             )`,
             {
                 statusId,
                 userCod,
-                id,
+                agendamento,
                 estab
             }
         );
 
+        await conn.commit();
         res.sendStatus(200);
 
     } catch (err) {
@@ -251,10 +255,8 @@ app.put("/cargas/:id/status", authMiddleware, async (req, res) => {
     }
 });
 
-
 // STATIC
 app.use(express.static(path.join(__dirname, "fend")));
-
 
 // SERVER
 app.listen(3000, '0.0.0.0', () => {

@@ -39,6 +39,19 @@ function montarTabela(lista) {
     const estab = document.getElementById("select_estab").value;
     tbody.innerHTML = "";
 
+    // SE NÃO TEM DADOS
+    if (!lista || lista.length === 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td colspan="11" class="p-4 text-center text-black-500">
+                Nenhum dado encontrado para os filtros selecionados
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+        return;
+    }
+
     lista.forEach(item => {
 
         // evita quebrar se vier undefined/null
@@ -96,6 +109,7 @@ document.getElementById("btn_filtrar")
 // ATUALIZAR STATUS
 async function atualizarStatus(id, agendamento, estab, status) {
     try {
+        console.log(`Id: ${id} Agendamento: ${agendamento}`);
         const token = localStorage.getItem("token");
         const usuario = localStorage.getItem("usuario");
         const usuarioCod = localStorage.getItem("userCod");
@@ -105,7 +119,7 @@ async function atualizarStatus(id, agendamento, estab, status) {
         console.log(`Estabi ${estabCod}`)
 
         // Atualiza status normal
-        await fetch(`/cargas/${id}/status`, {
+        await fetch(`/cargas/${agendamento}/status`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
