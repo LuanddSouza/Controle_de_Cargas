@@ -21,12 +21,10 @@
         </div>
 
         <div class="flex gap-2">
-            <button id="voltarr"
-                class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg shadow">
+            <button id="voltarr" class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg shadow">
                 Voltar
             </button>
-            <button id="sair"
-                class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg shadow">
+            <button id="sair" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg shadow">
                 Sair
             </button>
         </div>
@@ -39,37 +37,53 @@
 
             <h2 class="text-2xl font-bold mb-6 text-center">Criar Usuário</h2>
 
-            <form class="flex flex-col gap-4">
+            <form class="flex flex-col gap-4" id="formUsuario">
 
-                <div class="flex flex-col" id="usuario">
+                <!-- USUARIO -->
+                <div class="flex flex-col">
                     <label class="text-sm text-gray-600">Usuário</label>
-                    <input type="text"
-                        class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    <input type="text" id="usuario" class="border rounded-lg p-2 focus:ring-2 focus:ring-green-500"
                         placeholder="Digite o usuário">
                 </div>
 
+                <!-- SENHA -->
                 <div class="flex flex-col">
                     <label class="text-sm text-gray-600">Senha</label>
-                    <input type="password" id="senha"
-                        class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    <input type="password" id="senha" class="border rounded-lg p-2 focus:ring-2 focus:ring-green-500"
                         placeholder="Digite a senha">
                 </div>
 
+                <!-- EMAIL -->
+                <div class="flex flex-col">
+                    <label class="text-sm text-gray-600">Email</label>
+                    <input type="email" id="email" class="border rounded-lg p-2 focus:ring-2 focus:ring-green-500"
+                        placeholder="Digite o email">
+                </div>
+
+                <!-- COMERCIAL -->
+                <div class="flex flex-col">
+                    <label class="text-sm text-gray-600">Usuário comercial</label>
+                    <select id="comercial" class="border rounded-lg p-2 focus:ring-2 focus:ring-green-500">
+                        <option value="">Selecione</option>
+                        <option value="S">Sim</option>
+                        <option value="N">Não</option>
+                    </select>
+                </div>
+
+                <!-- TIPO -->
                 <div class="flex flex-col">
                     <label class="text-sm text-gray-600">Tipo de usuário</label>
-                    <select id="tipo"
-                        class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select id="tipo" class="border rounded-lg p-2 focus:ring-2 focus:ring-green-500">
                         <option value="">Selecione</option>
                         <option value="producao">Produção</option>
-                        <option value="logistica">Logística</option>
+                        <option value="qualidade">Qualidade</option>
+                        <option value="carregamento">Carregamento</option>
                         <option value="financeiro">Financeiro</option>
                         <option value="adm">Administrador</option>
                     </select>
                 </div>
 
-                <!-- BOTÃO -->
-                <button type="submit"
-                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg mt-4 transition">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg">
                     Criar Usuário
                 </button>
 
@@ -82,69 +96,100 @@
 
 <script>
     const permissoes = {
-        producao: ["producao"],
-        logistica: ["carregando"],
-        financeiro: ["faturado"],
-        adm: ["producao", "carregando", "faturado", "cancelado"]
+        producao: 2,
+        qualidade: 3,
+        carregamento: 4,
+        financeiro: 5,
+        adm: 7
     };
 
-    const form = document.querySelector("form");
+    const form = document.getElementById("formUsuario");
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const usuario = document.getElementById("usuario");
         const senha = document.getElementById("senha");
+        const email = document.getElementById("email");
         const tipo = document.getElementById("tipo");
+        const comercial = document.getElementById("comercial");
 
         let erro = false;
 
-        [usuario, senha, tipo].forEach(campo => {
+        [usuario, senha, email, tipo, comercial].forEach(campo => {
             campo.classList.remove("border-red-500");
         });
 
-        if (usuario.value.trim() === "") {
+        if (!usuario.value.trim()) {
             usuario.classList.add("border-red-500");
             erro = true;
         }
 
-        if (senha.value.trim() === "") {
-            senha.classList.add("border-red-500");
-            erro = true;
-        } else if (senha.value.length < 4) {
-            alert("Senha deve ter pelo menos 4 caracteres");
+        if (!senha.value.trim() || senha.value.length < 4) {
             senha.classList.add("border-red-500");
             erro = true;
         }
 
-        if (tipo.value === "") {
+        if (!email.value.trim()) {
+            email.classList.add("border-red-500");
+            erro = true;
+        }
+
+        if (!tipo.value) {
             tipo.classList.add("border-red-500");
             erro = true;
         }
 
+        if (!comercial.value) {
+            comercial.classList.add("border-red-500");
+            erro = true;
+        }
+
         if (erro) {
-            alert("Preencha corretamente os campos!");
+            alert("Preencha corretamente!");
             return;
         }
 
         const novoUsuario = {
             usuario: usuario.value,
             senha: senha.value,
-            tipo: tipo.value,
-            permissoes: permissoes[tipo.value]
+            email: email.value,
+            comercial: comercial.value,
+            status: permissoes[tipo.value]
         };
 
-       // Post para inserir o novo usuario
-       //
-       ///
-       //
-       ///
+        try {
+            const res = await fetch("/api/users", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(novoUsuario)
+            });
 
-        console.log("Usuário criado:", novoUsuario);
+            const data = await res.json();
 
-        alert("Usuário criado com sucesso!");
+            if (!res.ok) throw new Error(data.erro);
 
-        form.reset();
+            Toastify({
+                text: "Usuario criado com sucesso",
+                duration: 1000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "green"
+            }).showToast();
+            form.reset();
+
+        } catch (err) {
+            console.error(err);
+            Toastify({
+                text: "Erro ao criar usuario",
+                duration: 1000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "red"
+            }).showToast();
+        }
     });
 
     // Deslogar

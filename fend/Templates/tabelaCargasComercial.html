@@ -112,10 +112,12 @@
         const dados = await response.json();
 
         console.log(dados.user.tipo);
-
-        if (dados.user.userCod != 'S') {
+        if (localStorage.getItem('tipo') != 'ADM') {
+              if (dados.user.userCod != 'S') {
             window.location.href = `/Templates/tabelaCargas.html?data=${data}`;
         }
+        }
+      
     }
     validarUsuario();
 

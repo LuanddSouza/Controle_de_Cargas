@@ -19,6 +19,27 @@ const permissoes = {
     adm: ["producao", "carregando", "faturado", "cancelado"]
 };
 
+const crypto = require("crypto");
+
+function hashPassword(password) {
+    const algo = "scrypt";
+    const N = 16384;
+    const r = 8;
+    const p = 1;
+
+    const salt = crypto.randomBytes(16).toString("hex");
+
+    const key = crypto.scryptSync(password, salt, 64, {
+        N,
+        r,
+        p,
+        maxmem: 128 * 1024 * 1024
+    });
+
+
+    return `${algo}:${N}:${r}:${p}$${salt}$${key.toString("hex")}`;
+}
+
 app.use(cors());
 app.use(express.json());
 
@@ -462,6 +483,65 @@ app.get("/cargas-calendario", async (req, res) => {
         res.status(500).json({ erro: err.message });
     }
 });
+
+//adicionar ususario
+app.post("/api/users", async (req, res) => {
+    const { usuario, senha, email, comercial, status } = req.body;
+    const senhaHash = hashPassword(senha);
+    const conn = await getConnection();
+
+    try {
+
+        let userId;
+
+        //INSERT USUÁRIO (ORACLE)
+        const result = await conn.execute(
+            `
+    INSERT INTO U_USUARIOSCUSTO 
+    (U_USUARIOSCUSTO_ID, USERID, SENHACRIP, EMAIL, COMERCIAL)
+    VALUES (7, :usuario, :senha, :email, :comercial)
+    RETURNING U_USUARIOSCUSTO_ID INTO :id
+    `,
+            {
+                usuario,
+                senha: senhaHash,
+                email,
+                comercial,
+                id: { dir: require("oracledb").BIND_OUT, type: require("oracledb").NUMBER }
+            }
+        );
+
+        userId = result.outBinds.id[0];
+
+        // INSERT STATUS
+        await conn.execute(
+            `
+           INSERT INTO u_usuariostatus 
+            (U_USUARIOSTATUS_ID, U_USUARIOSCUSTO_ID, U_STATUSAGENDAMENTO_ID)
+            VALUES (SEQ_USUARIOSTATUS.NEXTVAL, :userId, :status)
+            `,
+            { userId, status }
+        );
+
+        await conn.commit();
+
+        res.json({ sucesso: true });
+
+    } catch (err) {
+        console.error(err);
+        await conn.rollback();
+        res.status(500).json({ erro: "Erro no servidor" });
+    }
+});
+
+
+
+
+
+app.listen(3000, () => {
+    console.log("Servidor rodando na porta 3000");
+});
+
 
 // STATIC
 app.use(express.static(path.join(__dirname, "fend")));

@@ -20,6 +20,10 @@
                 <h2 class="header_titulo">CONTROLE DE SAÍDA E AGENDAMENTO DE CARGAS</h2>
             </div>
             <div>
+                <button id="conf"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-200 invisible">
+                    Tabela Comercial
+                </button>
                 <button id="sair"
                     class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-200">
                     Sair
@@ -104,6 +108,17 @@
 </body>
 
 <script>
+    if (localStorage.getItem('tipo') == 'ADM') {
+        const btn = document.getElementById('conf');
+        btn.classList.remove('invisible');
+    }
+
+    document.getElementById("conf").addEventListener("click", () => {
+
+        window.location.href = "/Templates/tabelaCargasComercial.html?data=${data}";
+    });
+
+
     async function validarUsuario() {
         const token = localStorage.getItem("token");
 
@@ -155,27 +170,27 @@
 
 <script>
     // Pega os parâmetros da URL
-   document.addEventListener("DOMContentLoaded", () => {
-    const params = new URLSearchParams(window.location.search);
+    document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search);
 
-    const data = params.get('data');
-    const estab = params.get("estab");
+        const data = params.get('data');
+        const estab = params.get("estab");
 
-    // seta data
-    document.querySelector("input").value = data;
+        // seta data
+        document.querySelector("input").value = data;
 
-    const selectTela = document.getElementById("select_estab");
+        const selectTela = document.getElementById("select_estab");
 
-    // espera o select estar pronto
-    setTimeout(() => {
-        if (estab) {
-            selectTela.value = estab;
-        }
+        // espera o select estar pronto
+        setTimeout(() => {
+            if (estab) {
+                selectTela.value = estab;
+            }
 
-        // Carregar Tabela
-        carregarTabela();
-    }, 100);
-});
+            // Carregar Tabela
+            carregarTabela();
+        }, 100);
+    });
 </script>
 
 <script>
