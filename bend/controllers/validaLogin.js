@@ -85,7 +85,8 @@ async function login(req, res) {
 
         const userTipo = usuario.DESCRICAO || usuario[4]
         const senhaHash = usuario.SENHACRIP || usuario[1];
-        const userCod = usuario.COMERCIAL || usuario[2];
+        const userCod = usuario.COMERCIAL || usuario[5];
+        const userID = usuario.U_USUARIOSCUSTO_ID || usuario[2]
 
         if (!senhaHash) {
             console.error("Hash não encontrado no usuário");
@@ -103,7 +104,8 @@ async function login(req, res) {
             {
                 user: user,
                 tipo: userTipo, //adm ou o status referente a carga para os usuarios
-                userCod: userCod
+                userCod: userCod,
+                userID: userID
             },
             getSecret(),
             { expiresIn: "1h" }

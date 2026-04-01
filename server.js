@@ -9,17 +9,8 @@ const { atualizaStatus } = require("./bend/controllers/atualizaStatus");
 const authMiddleware = require("./middlewares/authMiddleware");
 const { getConnection } = require("./bend/controllers/db");
 const oracledb = require('oracledb');
-
-const app = express();
-
-const permissoes = {
-    producao: ["producao"],
-    logistica: ["carregando"],
-    financeiro: ["faturado"],
-    adm: ["producao", "carregando", "faturado", "cancelado"]
-};
-
 const crypto = require("crypto");
+const app = express();
 
 function hashPassword(password) {
     const algo = "scrypt";
@@ -71,7 +62,6 @@ app.get("/home", authMiddleware, (req, res) => {
         tipo: req.tipo
     });
 });
-
 
 // CARGAS
 app.get("/cargas", authMiddleware, async (req, res) => {
@@ -389,10 +379,13 @@ app.put("/cargas/:agendamento/status", authMiddleware, async (req, res) => {
 
         const { agendamento } = req.params;
         const { status, estab } = req.body;
-        const userCod = req.user.userCod;
+        const userID = req.user.userID;
         const statusId = statusMap[status];
         const conn = await getConnection();
-
+        console.log( 'Status ' + statusId + 
+                ' Codigo User: ' +userID +
+                ' Agendamento: ' +agendamento + 
+                ' Estab: ' + estab)
         await conn.execute(
             `INSERT INTO u_logstatusagendamento 
             (
@@ -406,14 +399,14 @@ app.put("/cargas/:agendamento/status", authMiddleware, async (req, res) => {
             VALUES (
                 SEQ_U_LOGSTATUSAGENDAMENTO.NEXTVAL,
                 :statusId,
-                :userCod,
+                :userID,
                 SYSDATE,
                 :agendamento,
                 :estab
             )`,
             {
                 statusId,
-                userCod,
+                userID,
                 agendamento,
                 estab
             }
@@ -428,21 +421,20 @@ app.put("/cargas/:agendamento/status", authMiddleware, async (req, res) => {
     }
 });
 
-
+//mostrar no calendario
 app.get("/cargas-calendario", async (req, res) => {
     try {
         const { estab } = req.query;
         const conn = await getConnection();
         const result = await conn.execute(
             `
-            SELECT 
+             SELECT 
                 TO_CHAR(TRUNC(t.dtinclusao), 'YYYY-MM-DD') AS data,
 
                 COUNT(DISTINCT t.carga) AS total_cargas,
 
                 COUNT(DISTINCT CASE 
-                    WHEN s_final.U_STATUSAGENDAMENTO_ID < 5
-                    AND s_final.U_STATUSAGENDAMENTO_ID > 2
+                    WHEN s_final.U_STATUSAGENDAMENTO_ID > 2
                     THEN t.carga 
                 END) AS produzidas,
 
@@ -533,8 +525,6 @@ app.post("/api/users", async (req, res) => {
         res.status(500).json({ erro: "Erro no servidor" });
     }
 });
-
-
 
 
 
