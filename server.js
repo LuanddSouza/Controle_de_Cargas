@@ -53,7 +53,6 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "fend", "Templates", "index.html"));
 });
 
-
 // HOME
 app.get("/home", authMiddleware, (req, res) => {
     res.json({
@@ -466,6 +465,9 @@ app.post("/api/users", async (req, res) => {
     try {
 
         let userId;
+
+// o ultimo id de usuario e dar um +1 
+       // const ultimoID =  await conn.execute(``);
 
         //INSERT USUÁRIO (ORACLE)
         const result = await conn.execute(

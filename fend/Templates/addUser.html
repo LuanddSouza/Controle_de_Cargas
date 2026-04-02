@@ -196,7 +196,7 @@
 
     // Deslogar
     document.getElementById("sair").addEventListener("click", () => {
-        localStorage.removeItem("token");
+        localStorage.clear();
         window.location.href = "/login";
     });
 

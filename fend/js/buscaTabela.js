@@ -16,7 +16,7 @@ const regrasFluxo = {
 };
 
 function podeSelecionar(tipo, atual, opcao) {
-    if (tipo === "ADM") return true; // 🔥 ADM pode tudo
+    if (tipo === "ADM") return true; // ADM pode tudo
     return regrasFluxo[tipo]?.[atual] === opcao;
 }
 

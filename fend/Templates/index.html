@@ -55,8 +55,43 @@
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
 <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.href = "/login";
+            return;
+        }
+
+        try {
+            const response = await fetch("/home", {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            if (!response.ok) {
+                localStorage.clear();
+                window.location.href = "/login";
+                return;
+            }
+
+
+        } catch (err) {
+            localStorage.clear();
+            window.location.href = "/login";
+        }
+    });
+</script>
+<script>
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        window.location.href = "/login";
+    }
+
+
     if (localStorage.getItem('tipo') == 'ADM') {
         document.getElementById('conf').classList.remove('invisible');
     }
@@ -194,7 +229,7 @@
     }
 
     document.getElementById("sair").addEventListener("click", () => {
-        localStorage.removeItem("token");
+        localStorage.clear();
         window.location.href = "/login";
     });
 

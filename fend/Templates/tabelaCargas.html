@@ -162,7 +162,7 @@
 
     //Deslogar
     document.getElementById("sair").addEventListener("click", () => {
-        localStorage.removeItem("token"); // remove o token
+        localStorage.clear(); // remove o token
 
         window.location.href = "/login";
     });
@@ -200,7 +200,7 @@
 
         if (!token) {
 
-            window.location.href = "login";
+            window.location.href = "/login";
             return;
         }
 
@@ -223,7 +223,7 @@
             console.error(err);
 
             // token inválido → volta pro login
-            localStorage.removeItem("token");
+            localStorage.clear();
             window.location.href = "/login";
         }
     }
