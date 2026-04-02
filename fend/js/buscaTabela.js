@@ -131,7 +131,7 @@ function montarTabela(lista) {
 
         // evita quebrar se vier undefined/null
        // const id = item[9] ?? "";
-        const status = item[10] ?? "";
+        const status = item[9] ?? "";
         const cores = {
             'PENDENTE': 'bg-gray-400',
             'EM PRODUÇÃO': 'bg-blue-500',
@@ -140,7 +140,7 @@ function montarTabela(lista) {
             'FATURADO': 'bg-green-600',
             'CANCELADO': 'bg-red-500'
         };
-
+        console.log(status);
         const corClasse = cores[status] || "bg-gray-400";
 
         let tr = document.createElement("tr");

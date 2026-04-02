@@ -13,92 +13,55 @@
 
 <body class="bg-gray-100">
 
-    <head>
-        <div class="header bg-green-700">
-            <div class="header_conteudo">
-                <img class="header_logo" src="/img/logo-nutrepampa.png" alt="Logo Nutrepampa">
-                <h2 class="header_titulo">CONTROLE DE SAÍDA E AGENDAMENTO DE CARGAS</h2>
-            </div>
-            <div>
-                <button id="conf"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-200 invisible">
-                    Configurações
-                </button>
-                <button id="sair"
-                    class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-200">
-                    Sair
-                </button>
-            </div>
+    <div class="header bg-green-700">
+        <div class="header_conteudo">
+            <img class="header_logo" src="/img/logo-nutrepampa.png" alt="Logo Nutrepampa">
+            <h2 class="header_titulo">CONTROLE DE SAÍDA E AGENDAMENTO DE CARGAS</h2>
         </div>
-    </head>
+        <div>
+            <button id="conf"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-200 invisible">
+                Configurações
+            </button>
+            <button id="sair"
+                class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-200">
+                Sair
+            </button>
+        </div>
+    </div>
 
     <div class="container_home gap-3 mt-10">
         <div class="bg-white p-4 rounded-2xl shadow-md flex flex-col md:flex-row gap-3 items-center">
             <select id="select_estab"
                 class="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 outline-none">
-
             </select>
+
             <button id="btn_filtrar"
                 class="w-full md:w-auto bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
                 Filtrar
             </button>
         </div>
-        <div class="calendario">
+
+        <div class="calendario relative">
+            <!-- Loader -->
+            <div id="loader" class="hidden absolute inset-0 bg-white/70 z-10 flex justify-center items-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-green-600 border-t-transparent"></div>
+            </div>
+
             <div id="calendar"></div>
         </div>
     </div>
+
 </body>
 
-<!-- FullCalendar JS -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
-
-<script>
-
-    async function carregarhome() {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-
-            window.location.href = "/login";
-            return;
-        }
-
-        try {
-            const response = await fetch("/home", {
-                headers: {
-                    "Authorization": "Bearer " + token
-                }
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.erro);
-            }
-
-            console.log("Dados:", data);
-
-        } catch (err) {
-            console.error(err);
-
-            // token inválido → volta pro login
-            localStorage.removeItem("token");
-            window.location.href = "/login";
-        }
-    }
-
-    carregarhome();
-</script>
 
 <script>
     if (localStorage.getItem('tipo') == 'ADM') {
-        const btn = document.getElementById('conf');
-        btn.classList.remove('invisible');
+        document.getElementById('conf').classList.remove('invisible');
     }
 
     let calendar;
-
     let select = document.getElementById("select_estab");
 
     let estabelecimentos = [
@@ -111,7 +74,6 @@
         { id: 802, nome: "Provemix Vilhena" }
     ];
 
-    // popula select
     estabelecimentos.forEach(estab => {
         let option = document.createElement("option");
         option.value = estab.id;
@@ -119,7 +81,6 @@
         select.appendChild(option);
     });
 
-    // botão filtrar
     document.getElementById("btn_filtrar").addEventListener("click", () => {
         if (calendar) {
             calendar.refetchEvents();
@@ -134,6 +95,17 @@
             initialView: 'dayGridMonth',
             locale: 'pt-br',
             height: 600,
+
+            // LOADER
+            loading: function (isLoading) {
+                const loader = document.getElementById("loader");
+
+                if (isLoading) {
+                    loader.classList.remove("hidden");
+                } else {
+                    loader.classList.add("hidden");
+                }
+            },
 
             events: async function (fetchInfo, successCallback, failureCallback) {
                 try {
@@ -154,20 +126,20 @@
                         const produzidas = item.PRODUZIDAS;
                         const faturadas = item.FATURADAS;
 
-                        let color = '#60B8F4'; //pendente 
+                        let color = '#60B8F4';
 
                         if (faturadas === total && total > 0) {
-                            color = '#15803D'; //tudo faturado
+                            color = '#15803D';
                         } else if (produzidas === total && total > 0) {
-                            color = '#F59F58'; // tudo produzido
+                            color = '#F59F58';
                         }
 
                         return {
                             title: `
-                                <div style="font-size:12px; line-height:1.2">
-                                    <b>Agendamentos ${total}</b><br>
-                                    Prouzidos ${produzidas}<br>
-                                    Faturados ${faturadas}
+                                <div style="font-size:11px; line-height:1.1">
+                                    <b>Agendamentos: ${total}</b> <br>
+                                     Produzidos: ${produzidas} <br>
+                                     Faturados: ${faturadas}
                                 </div>
                             `,
                             date: item.DATA,
@@ -184,46 +156,48 @@
                 }
             },
 
-            //permite HTML dentro do evento
             eventContent: function (arg) {
                 return { html: arg.event.title };
             },
 
-            dateClick: async function (info) {
-                const data = info.dateStr;
-                const token = localStorage.getItem("token");
+            //CLICK NO DIA
+            dateClick: function (info) {
+                redirecionar(info.dateStr);
+            },
 
-                const response = await fetch("/home", {
-                    headers: {
-                        "Authorization": "Bearer " + token
-                    }
-                });
-
-                let codEstab = document.getElementById("select_estab").value;
-
-                const dados = await response.json();
-
-                if (dados.user.userCod == 'S') {
-                    window.location.href = `Templates/tabelaCargasComercial.html?data=${data}&estab=${codEstab}`;
-                } else {
-                    window.location.href = `Templates/tabelaCargas.html?data=${data}&estab=${codEstab}`;
-                }
+            // CLICK NO EVENTO
+            eventClick: function (info) {
+                redirecionar(info.event.startStr);
             }
         });
 
         calendar.render();
     });
-</script>
 
-<script>
-    //Deslogar
+    async function redirecionar(data) {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch("/home", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        let codEstab = document.getElementById("select_estab").value;
+        const dados = await response.json();
+
+        if (dados.user.userCod == 'S') {
+            window.location.href = `Templates/tabelaCargasComercial.html?data=${data}&estab=${codEstab}`;
+        } else {
+            window.location.href = `Templates/tabelaCargas.html?data=${data}&estab=${codEstab}`;
+        }
+    }
+
     document.getElementById("sair").addEventListener("click", () => {
-        localStorage.removeItem("token"); // remove o token
-
+        localStorage.removeItem("token");
         window.location.href = "/login";
     });
 
-    //Configuracoes
     document.getElementById("conf").addEventListener("click", () => {
         window.location.href = "/addUser";
     });

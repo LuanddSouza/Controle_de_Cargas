@@ -82,42 +82,37 @@ app.get("/cargas", authMiddleware, async (req, res) => {
 
         const result = await conn.execute(
             `SELECT 
-        t.carga,
-        t.coordenador,
-        TO_CHAR(MAX(CASE WHEN s.carregamento = 'S' THEN l.datalancamento END), 'HH24:MI') AS horacarrega,
-        SUM(i.quantidade) AS quantidade,
-        TO_CHAR(MAX(CASE WHEN s.qualidade = 'S' THEN l.datalancamento END), 'HH24:MI') AS horaqualidade,
-        t.placa,
-        t.motorista,
-         t.tipocarga,
-         TO_CHAR(MAX(CASE WHEN s.faturamento = 'S' THEN l.datalancamento END), 'HH24:MI') AS horafaturamento,
-         t.represent,
+    t.idcarga,
+   -- t.represent,
+    t.coordenador,
+
+    TO_CHAR(MAX(CASE WHEN s.carregamento = 'S' THEN l.datalancamento END), 'HH24:MI:SS') AS horacarrega,
+    SUM(i.quantidade) AS quantidade,
+    TO_CHAR(MAX(CASE WHEN s.qualidade = 'S' THEN l.datalancamento END), 'HH24:MI:SS') AS horaqualidade,
+    t.placa,
+
+
+    t.motorista,
+    t.tipocarga,
+    TO_CHAR(MAX(CASE WHEN s.faturamento = 'S' THEN l.datalancamento END), 'HH24:MI:SS') AS horafaturamento,
 
     COALESCE(
-    MAX(
-        CASE 
-            WHEN l.datalancamento IS NOT NULL 
-             AND l.datalancamento > DATE '1900-01-01'
-            THEN s.descricao
-        END
-    ) KEEP (DENSE_RANK LAST ORDER BY l.datalancamento),null
-        /*(
-           select * from 
-           (
-             select descricao from u_statusagendamento
-             order by sequencia
-           ) where rownum = 1
-        )*/
+      MAX(
+          CASE 
+              WHEN l.datalancamento IS NOT NULL 
+               AND l.datalancamento > DATE '1900-01-01'
+              THEN s.descricao
+          END
+      ) KEEP (DENSE_RANK LAST ORDER BY l.datalancamento),null
     ) AS status
-
 FROM 
 (
     SELECT 
-        cargafat.estab,
-        cargafat.carga,
+        ordemcargacab.estab,
+        ordemcargacab.idcarga,
         preprese.represent,
         preprese.descricao coordenador,    
-        cargafat.placa,
+        ordemcargatransp.placa,
 
         CASE 
             WHEN ppesspre.nome IS NOT NULL THEN 
@@ -131,53 +126,49 @@ FROM
         ordemcargadoc.serieped,
         ordemcargadoc.numeroped    
 
-    FROM cargafat
-    
-    LEFT JOIN ordemcargacab 
-        ON ordemcargacab.estab = cargafat.estab
-        AND ordemcargacab.idcarga = cargafat.carga
-       
+    FROM ordemcargacab 
+
     LEFT JOIN ordemcargadoc 
-        ON ordemcargadoc.idcarga = cargafat.carga     
-       
+        ON ordemcargadoc.idcarga = ordemcargacab.idcarga     
+        
     LEFT JOIN pedcab 
         ON pedcab.estab = ordemcargadoc.estabped
         AND pedcab.serie = ordemcargadoc.serieped
         AND pedcab.numero = ordemcargadoc.numeroped 
-    
+
     LEFT JOIN preprese 
         ON preprese.represent = pedcab.canaldevenda
         AND preprese.empresa = 1
-       
+
     LEFT JOIN ordemcargatransp 
-        ON ordemcargatransp.idcarga = cargafat.carga 
-       
+        ON ordemcargatransp.idcarga = ordemcargacab.idcarga 
+
     LEFT JOIN ppesspre    
         ON ppesspre.empresa = 1
         AND ppesspre.prestador = idmotorista
-       
+
     LEFT JOIN ordemcargacab_u 
-        ON ordemcargacab_u.idcarga = cargafat.carga 
-       
-    WHERE cargafat.estab = :estab
-    AND cargafat.dtinclusao = TO_DATE(:data, 'DD/MM/YYYY')
-    
+        ON ordemcargacab_u.idcarga = ordemcargacab.idcarga 
+        
+    WHERE ordemcargacab.estab = :estab
+    AND ordemcargacab.dtinclusao =  TO_DATE(:data, 'DD/MM/YYYY')
+
 ) t
 
 LEFT JOIN u_logstatusagendamento l
     ON l.estab = t.estab 
-    AND l.numagendamento = t.carga
+    AND l.numagendamento = t.idcarga
 
 LEFT JOIN u_statusagendamento s
     ON s.u_statusagendamento_id = l.u_statusagendamento_id
 
-LEFT JOIN (
+INNER JOIN (
     SELECT 
         iddoc,
         estabped,
         serieped,
-        numeroped,
-        ROUND(SUM(quantidade / case when itemagro.unidade <> 'KG' then itemagro.pesobruto else 1000 end),2) quantidade
+        numeroped,        
+        ROUND(SUM((quantidade * CASE WHEN itemagro.unidade IN ('SC','FD') THEN itemagro.pesobruto ELSE 1 END)) / 1000,2) AS quantidade        
     FROM ordemcargaitem
          INNER JOIN itemagro on 
             itemagro.item = ordemcargaitem.item 
@@ -188,12 +179,8 @@ LEFT JOIN (
         numeroped
 ) i
     ON i.iddoc = t.iddoc
-    AND i.estabped = t.estabped 
-    AND i.serieped = t.serieped
-    AND i.numeroped = t.numeroped
-
 GROUP BY 
-    t.carga,
+    t.idcarga,
     t.represent,
     t.coordenador,
     t.placa,
@@ -201,7 +188,7 @@ GROUP BY
     t.tipocarga
 
 ORDER BY 
-    t.carga` ,
+    t.idcarga` ,
             {
                 estab,
                 data
@@ -235,37 +222,33 @@ app.get("/cargasComercial", authMiddleware, async (req, res) => {
 
         const result = await conn.execute(
             `SELECT 
-        t.carga,
-        t.coordenador,
-        t.placa,
-        t.motorista,
-         t.tipocarga,
-         TO_CHAR(MAX(CASE WHEN s.faturamento = 'S' THEN l.datalancamento END), 'HH24:MI') AS horafaturamento,
-    COALESCE(
-    MAX(
-        CASE 
-            WHEN l.datalancamento IS NOT NULL 
-             AND l.datalancamento > DATE '1900-01-01'
-            THEN s.descricao
-        END
-    ) KEEP (DENSE_RANK LAST ORDER BY l.datalancamento),null
-        /*(
-           select * from 
-           (
-             select descricao from u_statusagendamento
-             order by sequencia
-           ) where rownum = 1
-        )*/
-    ) AS status
+    t.idcarga,
+   -- t.represent,
+    t.coordenador,
+    t.placa,
 
+
+    t.motorista,
+    t.tipocarga,
+        TO_CHAR(MAX(CASE WHEN s.faturamento = 'S' THEN l.datalancamento END), 'HH24:MI:SS') AS horafaturamento,
+
+    COALESCE(
+      MAX(
+          CASE 
+              WHEN l.datalancamento IS NOT NULL 
+               AND l.datalancamento > DATE '1900-01-01'
+              THEN s.descricao
+          END
+      ) KEEP (DENSE_RANK LAST ORDER BY l.datalancamento),null
+    ) AS status
 FROM 
 (
     SELECT 
-        cargafat.estab,
-        cargafat.carga,
+        ordemcargacab.estab,
+        ordemcargacab.idcarga,
         preprese.represent,
         preprese.descricao coordenador,    
-        cargafat.placa,
+        ordemcargatransp.placa,
 
         CASE 
             WHEN ppesspre.nome IS NOT NULL THEN 
@@ -279,53 +262,49 @@ FROM
         ordemcargadoc.serieped,
         ordemcargadoc.numeroped    
 
-    FROM cargafat
-    
-    LEFT JOIN ordemcargacab 
-        ON ordemcargacab.estab = cargafat.estab
-        AND ordemcargacab.idcarga = cargafat.carga
-       
+    FROM ordemcargacab 
+
     LEFT JOIN ordemcargadoc 
-        ON ordemcargadoc.idcarga = cargafat.carga     
-       
+        ON ordemcargadoc.idcarga = ordemcargacab.idcarga     
+        
     LEFT JOIN pedcab 
         ON pedcab.estab = ordemcargadoc.estabped
         AND pedcab.serie = ordemcargadoc.serieped
         AND pedcab.numero = ordemcargadoc.numeroped 
-    
+
     LEFT JOIN preprese 
         ON preprese.represent = pedcab.canaldevenda
         AND preprese.empresa = 1
-       
+
     LEFT JOIN ordemcargatransp 
-        ON ordemcargatransp.idcarga = cargafat.carga 
-       
+        ON ordemcargatransp.idcarga = ordemcargacab.idcarga 
+
     LEFT JOIN ppesspre    
         ON ppesspre.empresa = 1
         AND ppesspre.prestador = idmotorista
-       
+
     LEFT JOIN ordemcargacab_u 
-        ON ordemcargacab_u.idcarga = cargafat.carga 
-       
-    WHERE cargafat.estab = :estab
-    AND cargafat.dtinclusao = TO_DATE(:data, 'DD/MM/YYYY')
-    
+        ON ordemcargacab_u.idcarga = ordemcargacab.idcarga 
+        
+    WHERE ordemcargacab.estab = :estab
+    AND ordemcargacab.dtinclusao =  TO_DATE(:data, 'DD/MM/YYYY')
+
 ) t
 
 LEFT JOIN u_logstatusagendamento l
     ON l.estab = t.estab 
-    AND l.numagendamento = t.carga
+    AND l.numagendamento = t.idcarga
 
 LEFT JOIN u_statusagendamento s
     ON s.u_statusagendamento_id = l.u_statusagendamento_id
 
-LEFT JOIN (
+INNER JOIN (
     SELECT 
         iddoc,
         estabped,
         serieped,
-        numeroped,
-        ROUND(SUM(quantidade / case when itemagro.unidade <> 'KG' then itemagro.pesobruto else 1000 end),2) quantidade
+        numeroped,        
+        ROUND(SUM((quantidade * CASE WHEN itemagro.unidade IN ('SC','FD') THEN itemagro.pesobruto ELSE 1 END)) / 1000,2) AS quantidade        
     FROM ordemcargaitem
          INNER JOIN itemagro on 
             itemagro.item = ordemcargaitem.item 
@@ -336,12 +315,8 @@ LEFT JOIN (
         numeroped
 ) i
     ON i.iddoc = t.iddoc
-    AND i.estabped = t.estabped 
-    AND i.serieped = t.serieped
-    AND i.numeroped = t.numeroped
-
 GROUP BY 
-    t.carga,
+    t.idcarga,
     t.represent,
     t.coordenador,
     t.placa,
@@ -349,7 +324,7 @@ GROUP BY
     t.tipocarga
 
 ORDER BY 
-    t.carga` ,
+    t.idcarga` ,
             {
                 estab,
                 data
@@ -382,10 +357,10 @@ app.put("/cargas/:agendamento/status", authMiddleware, async (req, res) => {
         const userID = req.user.userID;
         const statusId = statusMap[status];
         const conn = await getConnection();
-        console.log( 'Status ' + statusId + 
-                ' Codigo User: ' +userID +
-                ' Agendamento: ' +agendamento + 
-                ' Estab: ' + estab)
+        console.log('Status ' + statusId +
+            ' Codigo User: ' + userID +
+            ' Agendamento: ' + agendamento +
+            ' Estab: ' + estab)
         await conn.execute(
             `INSERT INTO u_logstatusagendamento 
             (
@@ -428,42 +403,48 @@ app.get("/cargas-calendario", async (req, res) => {
         const conn = await getConnection();
         const result = await conn.execute(
             `
-             SELECT 
-                TO_CHAR(TRUNC(t.dtinclusao), 'YYYY-MM-DD') AS data,
+             WITH base AS (
+    SELECT 
+        ordemcargacab.idcarga,
+        TRUNC(ordemcargacab.dtinclusao) AS data,
+        
+        MAX(s.U_STATUSAGENDAMENTO_ID)
+            KEEP (DENSE_RANK LAST ORDER BY l.datalancamento) AS status_id
 
-                COUNT(DISTINCT t.carga) AS total_cargas,
+    FROM ordemcargacab
 
-                COUNT(DISTINCT CASE 
-                    WHEN s_final.U_STATUSAGENDAMENTO_ID > 2
-                    THEN t.carga 
-                END) AS produzidas,
+    LEFT JOIN u_logstatusagendamento l
+        ON l.estab = ordemcargacab.estab 
+        AND l.numagendamento = ordemcargacab.idcarga
 
-                COUNT(DISTINCT CASE 
-                    WHEN s_final.U_STATUSAGENDAMENTO_ID >= 5 
-                    THEN t.carga 
-                END) AS faturadas
+    LEFT JOIN u_statusagendamento s
+        ON s.u_statusagendamento_id = l.u_statusagendamento_id
 
-            FROM cargafat t
+    WHERE ordemcargacab.estab = :estab
+    AND TRUNC(ordemcargacab.dtinclusao) > DATE '2026-01-01'
 
-            LEFT JOIN (
-                SELECT 
-                    l.estab,
-                    l.numagendamento,
-                    MAX(s.U_STATUSAGENDAMENTO_ID)
-                        KEEP (DENSE_RANK LAST ORDER BY l.datalancamento) AS U_STATUSAGENDAMENTO_ID
-                FROM u_logstatusagendamento l
-                JOIN u_statusagendamento s
-                    ON s.U_STATUSAGENDAMENTO_ID = l.U_STATUSAGENDAMENTO_ID
-                GROUP BY 
-                    l.estab,
-                    l.numagendamento
-            ) s_final
-                ON s_final.estab = t.estab
-                AND s_final.numagendamento = t.carga
+    GROUP BY 
+        ordemcargacab.idcarga,
+        TRUNC(ordemcargacab.dtinclusao)
+)
 
-            WHERE t.estab = :estab
-            GROUP BY TRUNC(t.dtinclusao)
-            ORDER BY data
+SELECT 
+    TO_CHAR(data, 'YYYY-MM-DD') AS data,
+
+    COUNT(idcarga) AS total_cargas,
+
+    COUNT(CASE 
+        WHEN status_id > 2 THEN 1
+    END) AS produzidas,
+
+    COUNT(CASE 
+        WHEN status_id >= 5 THEN 1
+    END) AS faturadas
+
+FROM base
+
+GROUP BY data
+ORDER BY data
             `,
             [estab],
             { outFormat: oracledb.OUT_FORMAT_OBJECT }
