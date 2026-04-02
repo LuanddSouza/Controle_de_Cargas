@@ -1,6 +1,26 @@
-
-
 let listaOriginal = [];
+
+const tipoUsuario = localStorage.getItem("tipo");
+
+const regrasFluxo = {
+    PRODUCAO: {
+        "PENDENTE": "EM PRODUÇÃO",
+        "EM PRODUÇÃO": "QUALIDADE"
+    },
+    QUALIDADE: {
+        "QUALIDADE": "CARREGAMENTO"
+    },
+    FINANCEIRO: {
+        "CARREGAMENTO": "FATURADO"
+    }
+};
+
+function podeSelecionar(tipo, atual, opcao) {
+    if (tipo === "ADM") return true; // 🔥 ADM pode tudo
+    return regrasFluxo[tipo]?.[atual] === opcao;
+}
+
+
 
 //  CARREGAR TABELA
 async function carregarTabela() {
@@ -55,7 +75,22 @@ function filtrarTabela() {
 }
 
 function handleStatusChange(select, agendamento, estab) {
-    const status = select.value;
+    const novoStatus = select.value.toUpperCase();
+    const statusAtual = select.getAttribute("data-status");
+    const tipoUsuario = localStorage.getItem("tipo");
+
+    if (tipoUsuario !== "ADM") {
+        const permitido = regrasFluxo[tipoUsuario]?.[statusAtual];
+
+        if (permitido !== novoStatus) {
+            alert("Você não tem permissão para esse status!");
+            select.value = statusAtual.toLowerCase();
+            return;
+        }
+    }
+
+    // atualiza atributo
+    select.setAttribute("data-status", novoStatus);
 
     const cores = {
         pendente: "bg-gray-500",
@@ -66,13 +101,10 @@ function handleStatusChange(select, agendamento, estab) {
         cancelado: "bg-red-500"
     };
 
-    // limpa TODAS classes possíveis
     select.className = "status-select text-white rounded px-2 py-1";
+    select.classList.add(cores[select.value]);
 
-    // aplica nova cor
-    select.classList.add(cores[status]);
-
-    atualizarStatus(agendamento, estab, status);
+    atualizarStatus(agendamento, estab, select.value);
 }
 
 function removerCor(select) {
@@ -112,7 +144,27 @@ function restaurarCor(select) {
 function montarTabela(lista) {
     const tbody = document.getElementById("tbody_cargas");
     const estab = document.getElementById("select_estab").value;
+    const tipoUsuario = localStorage.getItem("tipo");
     tbody.innerHTML = "";
+
+    const regrasFluxo = {
+        PRODUCAO: {
+            "PENDENTE": "EM PRODUÇÃO",
+            "EM PRODUÇÃO": "QUALIDADE"
+        },
+        QUALIDADE: {
+            "QUALIDADE": "CARREGAMENTO"
+        },
+        FINANCEIRO: {
+            "CARREGAMENTO": "FATURADO"
+        },
+        ADM: {
+            "PENDENTE": "EM PRODUÇÃO",
+            "EM PRODUÇÃO": "QUALIDADE",
+            "QUALIDADE": "CARREGAMENTO",
+            "CARREGAMENTO": "FATURADO"
+        }
+    };
 
     // SE NÃO TEM DADOS
     if (!lista || lista.length === 0) {
@@ -130,7 +182,7 @@ function montarTabela(lista) {
     lista.forEach(item => {
 
         // evita quebrar se vier undefined/null
-       // const id = item[9] ?? "";
+        // const id = item[9] ?? "";
         const status = item[9] ?? "";
         const cores = {
             'PENDENTE': 'bg-gray-400',
@@ -164,18 +216,45 @@ function montarTabela(lista) {
 
            <td class="p-4">
                 <select 
+                    data-status="${status}"
                     class="status-select text-white rounded px-2 py-1 ${corClasse}"
                     onchange="handleStatusChange(this, '${item[0]}', '${estab}')"
                 >
-                    <option value="pendente" ${status === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
-                    <option value="producao" ${status === 'EM PRODUÇÃO' ? 'selected' : ''}>EM PRODUÇÃO</option>
-                    <option value="qualidade" ${status === 'QUALIDADE' ? 'selected' : ''}>QUALIDADE</option>
-                    <option value="carregando" ${status === 'CARREGAMENTO' ? 'selected' : ''}>CARREGAMENTO</option>
-                    <option value="faturado" ${status === 'FATURADO' ? 'selected' : ''}>FATURADO</option>
-                    <option value="cancelado" ${status === 'CANCELADO' ? 'selected' : ''}>CANCELADO</option>
+                    <option value="pendente" ${status === 'PENDENTE' ? 'selected' : ''}>
+                        PENDENTE
+                    </option>
+
+                    <option value="producao" 
+                        ${status === 'EM PRODUÇÃO' ? 'selected' : ''}
+                        ${!podeSelecionar(tipoUsuario, status, "EM PRODUÇÃO") ? 'disabled' : ''}>
+                        EM PRODUÇÃO
+                    </option>
+
+                    <option value="qualidade" 
+                        ${status === 'QUALIDADE' ? 'selected' : ''}
+                        ${!podeSelecionar(tipoUsuario, status, "QUALIDADE") ? 'disabled' : ''}>
+                        QUALIDADE
+                    </option>
+
+                    <option value="carregando" 
+                        ${status === 'CARREGAMENTO' ? 'selected' : ''}
+                        ${!podeSelecionar(tipoUsuario, status, "CARREGAMENTO") ? 'disabled' : ''}>
+                        CARREGAMENTO
+                    </option>
+
+                    <option value="faturado" 
+                        ${status === 'FATURADO' ? 'selected' : ''}
+                        ${!podeSelecionar(tipoUsuario, status, "FATURADO") ? 'disabled' : ''}>
+                        FATURADO
+                    </option>
+
+                    <option value="cancelado" 
+                        ${status === 'CANCELADO' ? 'selected' : ''}>
+                        CANCELADO
+                    </option>
                 </select>
-            </td> 
-        `;
+            </td>
+            `;
 
         tbody.appendChild(tr);
     });
@@ -189,7 +268,7 @@ document.getElementById("btn_filtrar")
 
 
 // ATUALIZAR STATUS
-async function atualizarStatus( agendamento, estab, status) {
+async function atualizarStatus(agendamento, estab, status) {
     try {
         const token = localStorage.getItem("token");
         const usuario = localStorage.getItem("usuario");

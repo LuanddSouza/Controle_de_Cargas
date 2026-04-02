@@ -472,7 +472,7 @@ app.post("/api/users", async (req, res) => {
             `
     INSERT INTO U_USUARIOSCUSTO 
     (U_USUARIOSCUSTO_ID, USERID, SENHACRIP, EMAIL, COMERCIAL)
-    VALUES (7, :usuario, :senha, :email, :comercial)
+    VALUES (SEQ_USUARIOSCUSTO.NEXTVAL, :usuario, :senha, :email, :comercial)
     RETURNING U_USUARIOSCUSTO_ID INTO :id
     `,
             {
